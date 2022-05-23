@@ -14,7 +14,7 @@ fi
 Failed_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list failed | wc -l`
 echo "Failed_Job_Count:$Failed_Job_Count"
 if [[ $Failed_Job_Count -gt 5 ]]; then
-   echo "$Failed_Job_Count deployment Jobs are failed or Retry"
+   echo "Agent Upgrade is Stopped. But Already $Failed_Job_Count deployment Jobs failed or Retry. Fix it first"
    exit 3
 fi
 
