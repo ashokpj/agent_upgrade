@@ -12,6 +12,7 @@ fi
 
 #Check Failed Job count if it is more then 10 then exit from Script
 Failed_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list failed | wc -l`
+echo "Failed_Job_Count:$Failed_Job_Count"
 if [[ $Failed_Job_Count -gt 5 ]]; then
    echo "$Failed_Job_Count deployment Jobs are failed or Retry"
    exit 3
