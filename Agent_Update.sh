@@ -38,22 +38,41 @@ do
       
       #Check Connection between OBM Server and Node
       /opt/OV/bin/bbcutil -ping $Primary_DNS_Name &> /dev/null
-      if [[ $? == 0 ]] ; then
-         #agent_upgrade[$i]="$Primary_DNS_Name|$Operating_System|$OA_Version"
-         agent_upgrade[$i]="$Primary_DNS_Name"
-         i=`expr $i + 1`         
-      else
+      if [[ $? != 0 ]] ; then
          # Add in remove list
          remove_list[$j]="$Primary_DNS_Name"
          j=`expr $j + 1`
+         continue
       fi
 
       # Check required Space in node end
       if [[ $Operating_System =~ ^Linux.* ]]; then
          echo "Linux : $Primary_DNS_Name"
+         #/opt/OV/bin/ovdeploy -ovrg server -cmd 'df -k /opt/OV /opt/perf /var/opt/OV'  -host ilg01gtcrh701.pdxc-dev.pdxc.com  | awk 'NR !=1 {print "\t"($2/1024 "MB")"\t\t",$0}'
+         opt_size=`/opt/OV/bin/ovdeploy -ovrg server -cmd 'df -m /opt' -host $Primary_DNS_Name | awk 'NR !=1 {print $4 }'`
+         var_opt=`/opt/OV/bin/ovdeploy -ovrg server -cmd 'df -m /var/opt/OV' -host $Primary_DNS_Name | awk 'NR !=1 {print $4 }'`
       elif [[ $Operating_System =~ ^Windows.*  ]]; then
          echo "Windows : $Primary_DNS_Name"
-      fi        
+         c_drive=`/opt/OV/bin/ovdeploy -ovrg server -cmd 'fsutil volume diskfree c:'  -host ilg01edgxw1904.pdxc-dev.pdxc.com | awk -F ":" '/avail free/{ print $2 }' | awk '{ print $1/1000000 }'`
+         echo "Less $Primary_DNS_Name c_drive is $c_drive"
+      else
+         echo "OS type Currently not support my $0 script"
+         continue
+      fi
+
+      if [[ $opt_size -lt 150 || $var_opt -lt 150 || $c_drive -lt 150 ]]; then
+         echo "Less $Primary_DNS_Name opt_size is $opt_size"
+         echo "Less $Primary_DNS_Name var_opt is $var_opt"
+         echo "Less $Primary_DNS_Name var_opt is $c_drive"
+         # Add in remove list
+         remove_list[$j]="$Primary_DNS_Name"
+         j=`expr $j + 1`
+         continue
+      else
+         #agent_upgrade[$i]="$Primary_DNS_Name|$Operating_System|$OA_Version"
+         agent_upgrade[$i]="$Primary_DNS_Name"
+         i=`expr $i + 1`
+      fi  
 
       # Number of server to agent upgrade it each then break the loop
       if [[ "${#agent_upgrade[@]}" -ge "13" ]]; then
