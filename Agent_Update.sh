@@ -5,10 +5,17 @@ mkdir -p "/tmp/agent_upgrade"
 echo "Check enolled_node_list file exist"
 
 #Exclusion Sever list 
+#Any deployment is running skip for next cycle
 
 if [[ -f "/tmp/agent_upgrade/enrolled_node_list.txt" ]]; then
    echo "/tmp/agent_upgrade/enrolled_node_list.txt exists."
 else
+   #Check upgrade agent in installed in OBM
+   upgrade_agent_in_obm=`/opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -lp | grep -i "12.20.005" | wc -l`
+   if [[ $upgrade_agent_in_obm -eq 0 ]]; then
+      echo "expect agent 12.20.005 is not present in OBM"
+      exit 1
+   fi
    echo "Creating enolled_node_list file"
    /opt/HP/BSM/opr/bin/opr-node.sh -list_nodes -rc_file /tmp/tmp_rc -ln | egrep "Primary DNS Name|Operating System|OA Version" > /tmp/agent_upgrade/enrolled_node_list.txt
 fi
