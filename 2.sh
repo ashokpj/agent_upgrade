@@ -15,8 +15,8 @@ read_config_file()
 }
 
 read_config_file ./agent_upgrade_config.cfg
-mkdir -p ./data
-mkdir -p ./log
+mkdir -p "${data_path}"
+mkdir -p "${log_path}"
 
 echo "After"
 echo "OS = $upgrading_os_type"
