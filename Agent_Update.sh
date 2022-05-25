@@ -20,6 +20,7 @@ read_config_file ./agent_upgrade_config.cfg
 mkdir -p "${data_path}"
 mkdir -p "${log_path}"
 
+
 # Create Enrolled Node Server List. It is one time process
 mkdir -p "/tmp/agent_upgrade"
 echo "Check enolled_node_list file exist"
@@ -30,6 +31,7 @@ echo "Check enolled_node_list file exist"
 if [[ -f "${data_path}/enrolled_node_list.txt" ]]; then
    echo "${data_path}/enrolled_node_list.txt exists."
 else
+   rm -rf ${data_path}/master_node_list.txt
    #Check upgrade agent in installed in OBM
    upgrade_agent_in_obm=`/opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -lp | grep -i "12.20.005" | wc -l`
    if [[ $upgrade_agent_in_obm -eq 0 ]]; then
@@ -49,7 +51,7 @@ else
          echo "$Primary_DNS_Name" 
          echo "$Operating_System" 
          echo "$OA_Version"
-         echo "$Primary_DNS_Name|$Operating_System|$OA_Version" > "${data_path}/master_node_list.txt"
+         echo "$Primary_DNS_Name|$Operating_System|$OA_Version" >> "${data_path}/master_node_list.txt"
       fi
    done <  "${data_path}/enrolled_node_list.txt"
 fi
