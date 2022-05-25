@@ -55,11 +55,22 @@ else
       fi
    done <  "${data_path}/enrolled_node_list.txt"
 
-   #exclude Server from master list
+   #Exclude Server from master list
    for i in $(echo $exclusion_nodes | sed "s/,/ /g")
    do
       sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
    done
+
+   #Get Agent status of the enrolled nodes
+   /opt/HP/BSM/opr/bin/opr-agt -rc_file /tmp/tmp_rc -status -all > ${data_path}/nodes_agent_status.txt
+
+   #Remove Agent error node from enrolled node list 
+   for i in `grep -i "383: ERROR" ${data_path}/nodes_agent_status.txt | awk -F ":" '{ print $1 }'`
+   do
+      echo "Remove from list : $i"
+      sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
+   done
+
 
 
 
