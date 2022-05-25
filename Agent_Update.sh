@@ -43,9 +43,9 @@ else
 
    while read Primary_DNS_Name; read Operating_System; read OA_Version
    do
-      OA_Version=`echo "$OA_Version" | awk -F "=" '{ print $2}' | awk '{$1=$1};1'`
-      Primary_DNS_Name=`echo "$Primary_DNS_Name" | awk -F "=" '{ print $2}' | awk '{$1=$1};1'`
-      Operating_System=`echo "$Operating_System" | awk -F "=" '{ print $2}' | awk '{$1=$1};1'`
+      OA_Version=`echo "$OA_Version" | awk -F "=" '{ print $2 }' | awk '{$1=$1};1'`
+      Primary_DNS_Name=`echo "$Primary_DNS_Name" | awk -F "=" '{ print $2 }' | awk '{$1=$1};1'`
+      Operating_System=`echo "$Operating_System" | awk -F "=" '{ print $2 }' | awk '{$1=$1};1'`
 
       if [[ $OA_Version != "12.20.005" ]]; then
          echo "$Primary_DNS_Name" 
@@ -54,6 +54,18 @@ else
          echo "$Primary_DNS_Name|$Operating_System|$OA_Version" >> "${data_path}/master_node_list.txt"
       fi
    done <  "${data_path}/enrolled_node_list.txt"
+
+   #exclude Server from master list
+   for i in $(echo $exclusion_nodes | sed "s/,/ /g")
+   do
+      sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
+   done
+
+
+
+
+
+
 fi
 
 exit 100
