@@ -15,6 +15,8 @@ read_config_file()
 }
 
 read_config_file ./agent_upgrade_config.cfg
+mkdir -p $data_path
+mkdir -p $log_path
 
 echo "After"
 echo "OS = $upgrading_os_type"
@@ -23,3 +25,4 @@ echo "no_of_nodes_upgrade_parallel = $no_of_nodes_upgrade_parallel"
 echo "exclusion_nodes = $exclusion_nodes"
 echo "data_path = $data_path"
 echo "log_path = $log_path"
+
