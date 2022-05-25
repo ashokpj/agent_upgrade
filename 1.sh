@@ -26,6 +26,6 @@ else
     for i in `grep -i "383: ERROR" /tmp/agent_upgrade/nodes_agent_status.txt | awk -F ":" '{ print $1 }'`
     do
         echo "Remove from list : $i"
-        sed -i.bak -e "/$i/,+2 d" /tmp/agent_upgrade/enrolled_node_list.txt
+        sed -i.bak -e "/$i/d" /tmp/agent_upgrade/enrolled_node_list.txt
     done
 fi
