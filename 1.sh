@@ -25,7 +25,7 @@ else
     #Remove Agent error node from enrolled node list 
     for i in `grep -i "383: ERROR" /tmp/agent_upgrade/nodes_agent_status.txt | awk -F ":" '{ print $1 }'`
     do
-        echo "Remove from list : $i"
+        echo "Agent having some issue. Hence removeing from enrolled_node_list.txt : $i"
         sed -i.bak -e "/$i/,+2 d" /tmp/agent_upgrade/enrolled_node_list.txt
     done
 fi
