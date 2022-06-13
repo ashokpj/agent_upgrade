@@ -20,9 +20,22 @@ read_config_file ./agent_upgrade_config.cfg
 mkdir -p "${data_path}"
 mkdir -p "${log_path}"
 
+#=========================================================================================================================
+# Set OBM username and Password
+#=========================================================================================================================
+printf "OBM Username: "
+read USERNAME
+stty -echo
+printf "OBM assword: "
+read PASSWORD
+stty echo
+printf "\n"
+sudo /opt/HP/BSM/opr/bin/opr-node.sh -rc_file /tmp/tmp_rc -set_rc username="$USERNAME";
+sudo /opt/HP/BSM/opr/bin/opr-node.sh -rc_file /tmp/tmp_rc -set_rc password="$PASSWORD";
+
 
 # Create Enrolled Node Server List. It is one time process
-mkdir -p "/tmp/agent_upgrade"
+#mkdir -p "/tmp/agent_upgrade"
 echo "Check enolled_node_list file exist"
 
 #Exclusion Sever list 
