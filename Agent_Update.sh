@@ -40,16 +40,12 @@ logend()
 # Read Configuration and set variable Value
 # Create data directory and log directory
 #=========================================================================================================================
-
+read_config_file ./agent_upgrade_config.cfg
 mkdir -p "${data_path}"
 mkdir -p "${log_path}"
 logstart "Starting"
-logit "Created data and log directory" 
-logit "Reading configuration file"
-read_config_file ./agent_upgrade_config.cfg
-
-
-
+logit "Created data and log directory"
+logit "Readed configuration file"
 
 #=========================================================================================================================
 # Set OBM username and Password
