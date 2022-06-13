@@ -43,7 +43,7 @@ logend()
 
 mkdir -p "${data_path}"
 mkdir -p "${log_path}"
-logstart()
+logstart "Starting"
 logit "Created data and log directory" 
 logit "Reading configuration file"
 read_config_file ./agent_upgrade_config.cfg
