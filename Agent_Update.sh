@@ -28,6 +28,10 @@ echo "Check enolled_node_list file exist"
 #Exclusion Sever list 
 #Any deployment is running skip for next cycle
 
+#=========================================================================================================================
+# Check master_node_list.txt exist in data_path else craete it
+#=========================================================================================================================
+
 if [[ -f "${data_path}/enrolled_node_list.txt" ]]; then
    echo "${data_path}/enrolled_node_list.txt exists."
 else
@@ -36,6 +40,7 @@ else
    #1. Check upgrade agent in installed in OBM Server. upgrade agent is not installed then exit
    # Update ${agent_upgrading_version}
    #=========================================================================================================================
+   echo "Step 1 processing"
    upgrade_agent_in_obm=`/opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -lp | grep -i "12.20.005" | wc -l`
    if [[ $upgrade_agent_in_obm -eq 0 ]]; then
       echo "expect agent 12.20.005 is not present in OBM"
@@ -45,6 +50,7 @@ else
    #=========================================================================================================================
    #2. Get OBM Enrolled node list
    #=========================================================================================================================
+   echo "Step 2 processing"
    echo "Creating enolled_node_list file"
    /opt/HP/BSM/opr/bin/opr-node.sh -list_nodes -rc_file /tmp/tmp_rc -ln | egrep "Primary DNS Name|Operating System|OA Version" > "${data_path}/enrolled_node_list.txt"
 
@@ -65,6 +71,7 @@ else
    #=========================================================================================================================
    #3. Remove node from Master list which has mentioned in exculsion list in configuration file
    #=========================================================================================================================
+   echo "Step 3 processing"
    for i in $(echo $exclusion_nodes | sed "s/,/ /g")
    do
       sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
@@ -73,7 +80,8 @@ else
    #=========================================================================================================================
    #4. Get Agent status of the enrolled nodes and remove node from master list if agent have any error or not running status.
    #=========================================================================================================================
-
+   
+   echo "Step 4 processing"
    /opt/HP/BSM/opr/bin/opr-agt -rc_file /tmp/tmp_rc -status -all > ${data_path}/nodes_agent_status.txt
 
    #Remove Agent error node from enrolled node list 
