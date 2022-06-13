@@ -11,6 +11,7 @@ read_config_file()
       "exclusion_nodes")   exclusion_nodes="$value" ;;
       "data_path")   data_path="$value" ;;
       "log_path")   log_path="$value" ;;
+      "stop_upgrade_deploy_failed_count")  stop_upgrade_deploy_failed_count="$value" ;;
     esac
   done < "$file"
 }
@@ -125,21 +126,21 @@ else
       #echo "Remove from list : $i"
       sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
    done
+   logend "Ending Master node list creation Cycle"
+   exit 100
 
 fi
-logend "Ending Agent update Cycle"
-
 
 #=========================================================================================================================
-# Check Failed Job count if it is more then configured value then exit from Script
+# Step 1: Exit if Failed Job count is more then configured value
 #=========================================================================================================================
-logit "Check Failed Job count if it is more then configured value then exit"
+logit "Step 1: Exit if Failed Job count is more then configured value"
 Failed_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list failed | wc -l`
 logit "Failed_Job_Count: ${Failed_Job_Count}"
 logit "Deployment job failed count: ${stop_upgrade_deploy_failed_count}"
 
 if [[ $Failed_Job_Count -gt ${stop_upgrade_deploy_failed_count} ]]; then
-   logit "Agent Upgrade is Stopped. Because already $Failed_Job_Count deployment Jobs failed or Retry. Fix it first"
+   logit "Agent Upgrade is Stopped. Because already $Failed_Job_Count deployment Jobs failed or Retry."
    exit 3
 fi
 
