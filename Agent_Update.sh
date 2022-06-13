@@ -17,7 +17,7 @@ read_config_file()
 
 logit() 
 {
-   echo "[`date`] - ${*}" >> tee "${log_path}"/agent_upgrade.log
+   echo "[`date`] - ${*}" | tee "${log_path}"/agent_upgrade.log
 }
 
 #=========================================================================================================================
