@@ -32,12 +32,19 @@ if [[ -f "${data_path}/enrolled_node_list.txt" ]]; then
    echo "${data_path}/enrolled_node_list.txt exists."
 else
    rm -rf ${data_path}/master_node_list.txt
-   #Check upgrade agent in installed in OBM
+   #=========================================================================================================================
+   #1. Check upgrade agent in installed in OBM Server. upgrade agent is not installed then exit
+   # Update ${agent_upgrading_version}
+   #=========================================================================================================================
    upgrade_agent_in_obm=`/opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -lp | grep -i "12.20.005" | wc -l`
    if [[ $upgrade_agent_in_obm -eq 0 ]]; then
       echo "expect agent 12.20.005 is not present in OBM"
       exit 1
    fi
+
+   #=========================================================================================================================
+   #2. Get OBM Enrolled node list
+   #=========================================================================================================================
    echo "Creating enolled_node_list file"
    /opt/HP/BSM/opr/bin/opr-node.sh -list_nodes -rc_file /tmp/tmp_rc -ln | egrep "Primary DNS Name|Operating System|OA Version" > "${data_path}/enrolled_node_list.txt"
 
@@ -55,13 +62,18 @@ else
       fi
    done <  "${data_path}/enrolled_node_list.txt"
 
-   #Exclude Server from master list
+   #=========================================================================================================================
+   #3. Remove node from Master list which has mentioned in exculsion list in configuration file
+   #=========================================================================================================================
    for i in $(echo $exclusion_nodes | sed "s/,/ /g")
    do
       sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
    done
 
-   #Get Agent status of the enrolled nodes
+   #=========================================================================================================================
+   #4. Get Agent status of the enrolled nodes and remove node from master list if agent have any error or not running status.
+   #=========================================================================================================================
+
    /opt/HP/BSM/opr/bin/opr-agt -rc_file /tmp/tmp_rc -status -all > ${data_path}/nodes_agent_status.txt
 
    #Remove Agent error node from enrolled node list 
