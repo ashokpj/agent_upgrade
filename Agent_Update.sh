@@ -24,26 +24,31 @@ logstart()
 }
 
 logit() 
-{
-   #echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
+{   
    echo "[`date`] - ${*}" | tee -a "${log_path}"/agent_upgrade.log
-   #echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
-}
+   }
 
 logend() 
 {
+   echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
    echo "[`date`] - ${*}" | tee -a "${log_path}"/agent_upgrade.log
    echo "[`date`] - Ending Cycle " | tee -a "${log_path}"/agent_upgrade.log
+   echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
    echo "\n\n" | tee -a "${log_path}"/agent_upgrade.log
 }
 #=========================================================================================================================
 # Read Configuration and set variable Value
 # Create data directory and log directory
 #=========================================================================================================================
-read_config_file ./agent_upgrade_config.cfg
+
 mkdir -p "${data_path}"
 mkdir -p "${log_path}"
+logstart()
 logit "Created data and log directory" 
+logit "Reading configuration file"
+read_config_file ./agent_upgrade_config.cfg
+
+
 
 
 #=========================================================================================================================
@@ -65,7 +70,7 @@ fi
 
 # Create Enrolled Node Server List. It is one time process
 #mkdir -p "/tmp/agent_upgrade"
-logit "Check enolled_node_list file exist"
+
 
 #Exclusion Sever list 
 #Any deployment is running skip for next cycle
@@ -73,29 +78,27 @@ logit "Check enolled_node_list file exist"
 #=========================================================================================================================
 # Check master_node_list.txt exist in data_path else craete it
 #=========================================================================================================================
-
+logit "Check enolled_node_list file exist"
 if [[ -f "${data_path}/enrolled_node_list.txt" ]]; then
-   logstart "Staring Agent update Cycle"
-   logit "${data_path}/enrolled_node_list.txt exists." 
+   logit "${data_path}/enrolled_node_list.txt file exists." 
 else
-   logstart "Creating Master node list"
+   logit "Creating Master node list"
    rm -rf ${data_path}/master_node_list.txt
    #=========================================================================================================================
    #1. Check upgrade agent in installed in OBM Server. upgrade agent is not installed then exit
    # Update ${agent_upgrading_version}
    #=========================================================================================================================
-   logit "Step 1 Check upgrade agent is already installed in OBM server "
-   upgrade_agent_in_obm=`/opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -lp | grep -i "12.20.005" | wc -l`
+   logit "Step 1: Check upgrade agent [ ${agent_upgrading_version} ] is already installed in OBM server "
+   upgrade_agent_in_obm=`/opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -lp | grep -i "${agent_upgrading_version}" | wc -l`
    if [[ $upgrade_agent_in_obm -eq 0 ]]; then
-      echo "expect agent 12.20.005 is not present in OBM"
+      logit "expect agent 12.20.005 is not present in OBM"
       exit 1
    fi
 
    #=========================================================================================================================
    #2. Get OBM Enrolled node list
    #=========================================================================================================================
-   echo "Step 2 processing"
-   echo "Creating enolled_node_list file"
+   logit "Step 2: Creating enolled_node_list file"
    /opt/HP/BSM/opr/bin/opr-node.sh -list_nodes -rc_file /tmp/tmp_rc -ln | egrep "Primary DNS Name|Operating System|OA Version" > "${data_path}/enrolled_node_list.txt"
 
    while read Primary_DNS_Name; read Operating_System; read OA_Version
@@ -105,9 +108,9 @@ else
       Operating_System=`echo "$Operating_System" | awk -F "=" '{ print $2 }' | awk '{$1=$1};1'`
 
       if [[ $OA_Version != "12.20.005" ]]; then
-         echo "$Primary_DNS_Name" 
-         echo "$Operating_System" 
-         echo "$OA_Version"
+         #echo "$Primary_DNS_Name" 
+         #echo "$Operating_System" 
+         #echo "$OA_Version"
          echo "$Primary_DNS_Name|$Operating_System|$OA_Version" >> "${data_path}/master_node_list.txt"
       fi
    done <  "${data_path}/enrolled_node_list.txt"
@@ -115,7 +118,7 @@ else
    #=========================================================================================================================
    #3. Remove node from Master list which has mentioned in exculsion list in configuration file
    #=========================================================================================================================
-   echo "Step 3 processing"
+   logit "Step 3:  Remove node from Master list which has mentioned in exculsion list in configuration file"
    for i in $(echo $exclusion_nodes | sed "s/,/ /g")
    do
       sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
@@ -125,13 +128,13 @@ else
    #4. Get Agent status of the enrolled nodes and remove node from master list if agent have any error or not running status.
    #=========================================================================================================================
    
-   echo "Step 4 processing"
+   logit "Step 4: Get Agent status of the enrolled nodes"
    /opt/HP/BSM/opr/bin/opr-agt -rc_file /tmp/tmp_rc -status -all > ${data_path}/nodes_agent_status.txt
 
-   #Remove Agent error node from enrolled node list 
+   logit "Step 5: Remove Agent error node from enrolled node list "
    for i in `grep -i "383: ERROR" ${data_path}/nodes_agent_status.txt | awk -F ":" '{ print $1 }'`
    do
-      echo "Remove from list : $i"
+      #echo "Remove from list : $i"
       sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
    done
 
