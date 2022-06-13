@@ -15,11 +15,27 @@ read_config_file()
   done < "$file"
 }
 
-logit() 
-{
+logstart() 
+{   
+   echo "================================================================"| tee "${log_path}"/agent_upgrade.log
+   echo "[`date`] - Starting Cycle " | tee "${log_path}"/agent_upgrade.log
    echo "[`date`] - ${*}" | tee "${log_path}"/agent_upgrade.log
+   echo "================================================================"| tee "${log_path}"/agent_upgrade.log
 }
 
+logit() 
+{
+   echo "================================================================"| tee "${log_path}"/agent_upgrade.log
+   echo "[`date`] - ${*}" | tee "${log_path}"/agent_upgrade.log
+   echo "================================================================"| tee "${log_path}"/agent_upgrade.log
+   echo "\n\n" | tee "${log_path}"/agent_upgrade.log
+}
+
+logend() 
+{
+   echo "[`date`] - ${*}" | tee "${log_path}"/agent_upgrade.log
+   echo "[`date`] - Ending Cycle " | tee "${log_path}"/agent_upgrade.log
+}
 #=========================================================================================================================
 # Read Configuration and set variable Value
 # Create data directory and log directory
@@ -57,8 +73,10 @@ logit "Check enolled_node_list file exist"
 #=========================================================================================================================
 
 if [[ -f "${data_path}/enrolled_node_list.txt" ]]; then
+   logstart "Staring Agent update Cycle"
    logit "${data_path}/enrolled_node_list.txt exists." 
 else
+   logstart "Creating Master node list"
    rm -rf ${data_path}/master_node_list.txt
    #=========================================================================================================================
    #1. Check upgrade agent in installed in OBM Server. upgrade agent is not installed then exit
@@ -116,7 +134,7 @@ else
    done
 
 fi
-
+logend "Ending Agent update Cycle"
 exit 100
 
 
