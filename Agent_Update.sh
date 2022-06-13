@@ -17,48 +17,50 @@ read_config_file()
 
 logstart() 
 {   
-   echo "================================================================"| tee "${log_path}"/agent_upgrade.log
-   echo "[`date`] - Starting Cycle " | tee "${log_path}"/agent_upgrade.log
-   echo "[`date`] - ${*}" | tee "${log_path}"/agent_upgrade.log
-   echo "================================================================"| tee "${log_path}"/agent_upgrade.log
+   echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
+   echo "[`date`] - Starting Cycle " | tee -a "${log_path}"/agent_upgrade.log
+   echo "[`date`] - ${*}" | tee -a "${log_path}"/agent_upgrade.log
+   echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
 }
 
 logit() 
 {
-   echo "================================================================"| tee "${log_path}"/agent_upgrade.log
-   echo "[`date`] - ${*}" | tee "${log_path}"/agent_upgrade.log
-   echo "================================================================"| tee "${log_path}"/agent_upgrade.log
-   echo "\n\n" | tee "${log_path}"/agent_upgrade.log
+   echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
+   echo "[`date`] - ${*}" | tee -a "${log_path}"/agent_upgrade.log
+   echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
+   echo "\n\n" | tee -a "${log_path}"/agent_upgrade.log
 }
 
 logend() 
 {
-   echo "[`date`] - ${*}" | tee "${log_path}"/agent_upgrade.log
-   echo "[`date`] - Ending Cycle " | tee "${log_path}"/agent_upgrade.log
+   echo "[`date`] - ${*}" | tee -a "${log_path}"/agent_upgrade.log
+   echo "[`date`] - Ending Cycle " | tee -a "${log_path}"/agent_upgrade.log
 }
 #=========================================================================================================================
 # Read Configuration and set variable Value
 # Create data directory and log directory
 #=========================================================================================================================
 read_config_file ./agent_upgrade_config.cfg
-logit "Creating data and log directory" 
 mkdir -p "${data_path}"
 mkdir -p "${log_path}"
+logit "Created data and log directory" 
 
 
 #=========================================================================================================================
 # Set OBM username and Password
 #=========================================================================================================================
-logit "Enter OBM application credential" 
-printf "OBM Username: "
-read USERNAME
-stty -echo
-printf "OBM assword: "
-read PASSWORD
-stty echo
-printf "\n"
-sudo /opt/HP/BSM/opr/bin/opr-node.sh -rc_file /tmp/tmp_rc -set_rc username="$USERNAME";
-sudo /opt/HP/BSM/opr/bin/opr-node.sh -rc_file /tmp/tmp_rc -set_rc password="$PASSWORD";
+if [[ ! -f /tmp/tmp_rc ]]; then
+   logit "Enter OBM application credential" 
+   printf "OBM Username: "
+   read USERNAME
+   stty -echo
+   printf "OBM assword: "
+   read PASSWORD
+   stty echo
+   printf "\n"
+   sudo /opt/HP/BSM/opr/bin/opr-node.sh -rc_file /tmp/tmp_rc -set_rc username="$USERNAME";
+   sudo /opt/HP/BSM/opr/bin/opr-node.sh -rc_file /tmp/tmp_rc -set_rc password="$PASSWORD";
+fi
 
 
 # Create Enrolled Node Server List. It is one time process
