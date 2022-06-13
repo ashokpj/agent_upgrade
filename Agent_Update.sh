@@ -127,20 +127,42 @@ else
 
 fi
 logend "Ending Agent update Cycle"
-exit 100
+
 
 #=========================================================================================================================
 # Check Failed Job count if it is more then configured value then exit from Script
 #=========================================================================================================================
 logit "Check Failed Job count if it is more then configured value then exit"
 Failed_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list failed | wc -l`
-echo "Failed_Job_Count:$Failed_Job_Count"
-if [[ $Failed_Job_Count -gt 15 ]]; then
+logit "Failed_Job_Count: ${Failed_Job_Count}"
+logit "Deployment job failed count: ${stop_upgrade_deploy_failed_count}"
+
+if [[ $Failed_Job_Count -gt ${stop_upgrade_deploy_failed_count} ]]; then
    logit "Agent Upgrade is Stopped. Because already $Failed_Job_Count deployment Jobs failed or Retry. Fix it first"
    exit 3
 fi
 
 
+
+#=========================================================================================================================
+# Loop master node list
+#=========================================================================================================================
+
+#Declare variable i and J for array index
+i=0
+j=0
+
+while read Record
+do
+   Primary_DNS_Name=`echo "$Record" | awk -F "=" '{ print $1}' | awk '{$1=$1};1'`
+   Operating_System=`echo "$Record" | awk -F "=" '{ print $2}' | awk '{$1=$1};1'`
+   OA_Version=`echo "$Record" | awk -F "=" '{ print $3}' | awk '{$1=$1};1'`
+
+   echo "$Primary_DNS_Name===$Operating_System===$OA_Version"
+
+done <  "${data_path}/master_node_list.txt"
+
+exit 100
 
 
 
