@@ -63,31 +63,23 @@ if [[ ! -f /tmp/tmp_rc ]]; then
    sudo /opt/HP/BSM/opr/bin/opr-node.sh -rc_file /tmp/tmp_rc -set_rc password="$PASSWORD";
 fi
 
-
-# Create Enrolled Node Server List. It is one time process
-#mkdir -p "/tmp/agent_upgrade"
-
-
-#Exclusion Sever list 
-#Any deployment is running skip for next cycle
-
 #=========================================================================================================================
 # Check master_node_list.txt exist in data_path else craete it
 #=========================================================================================================================
 logit "Check enolled_node_list file exist"
 if [[ -f "${data_path}/enrolled_node_list.txt" ]]; then
-   logit "${data_path}/enrolled_node_list.txt file exists." 
+   logit "enrolled_node_list.txt file exists in data directory."
+   logit "Start Agent upgrading"
 else
    logit "Creating Master node list"
    rm -rf ${data_path}/master_node_list.txt
    #=========================================================================================================================
    #1. Check upgrade agent in installed in OBM Server. upgrade agent is not installed then exit
-   # Update ${agent_upgrading_version}
    #=========================================================================================================================
    logit "Step 1: Check upgrade agent [ ${agent_upgrading_version} ] is already installed in OBM server "
    upgrade_agent_in_obm=`/opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -lp | grep -i "${agent_upgrading_version}" | wc -l`
    if [[ $upgrade_agent_in_obm -eq 0 ]]; then
-      logit "expect agent 12.20.005 is not present in OBM"
+      logit "Expect agent 12.20.005 is not present in OBM"
       exit 1
    fi
 
@@ -123,7 +115,6 @@ else
    #=========================================================================================================================
    #4. Get Agent status of the enrolled nodes and remove node from master list if agent have any error or not running status.
    #=========================================================================================================================
-   
    logit "Step 4: Get Agent status of the enrolled nodes"
    /opt/HP/BSM/opr/bin/opr-agt -rc_file /tmp/tmp_rc -status -all > ${data_path}/nodes_agent_status.txt
 
@@ -138,15 +129,20 @@ fi
 logend "Ending Agent update Cycle"
 exit 100
 
-
-
-#Check Failed Job count if it is more then 10 then exit from Script
+#=========================================================================================================================
+# Check Failed Job count if it is more then configured value then exit from Script
+#=========================================================================================================================
+logit "Check Failed Job count if it is more then configured value then exit"
 Failed_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list failed | wc -l`
 echo "Failed_Job_Count:$Failed_Job_Count"
 if [[ $Failed_Job_Count -gt 15 ]]; then
-   echo "Agent Upgrade is Stopped. Because already $Failed_Job_Count deployment Jobs failed or Retry. Fix it first"
+   logit "Agent Upgrade is Stopped. Because already $Failed_Job_Count deployment Jobs failed or Retry. Fix it first"
    exit 3
 fi
+
+
+
+
 
 #Declare variable i and J for array index
 i=0
@@ -229,5 +225,3 @@ do
    sed -i.bak -e "/$i/,+2 d" /tmp/agent_upgrade/enrolled_node_list.txt
 done
 
-echo "Good Day Well Done"
-echo "Have Nice Day Ashok"
