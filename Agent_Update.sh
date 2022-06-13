@@ -15,12 +15,17 @@ read_config_file()
   done < "$file"
 }
 
+logit() 
+{
+   echo "[`date`] - ${*}" >> tee "${log_path}"/agent_upgrade.log
+}
+
 #=========================================================================================================================
 # Read Configuration and set variable Value
 # Create data directory and log directory
 #=========================================================================================================================
 read_config_file ./agent_upgrade_config.cfg
-echo "Creating data and log directory" | tee "${log_path}"/agent_upgrade.log
+logit "Creating data and log directory" 
 mkdir -p "${data_path}"
 mkdir -p "${log_path}"
 
@@ -28,7 +33,7 @@ mkdir -p "${log_path}"
 #=========================================================================================================================
 # Set OBM username and Password
 #=========================================================================================================================
-echo "Enter OBM application credential"  | tee "${log_path}"/agent_upgrade.log
+logit "Enter OBM application credential" 
 printf "OBM Username: "
 read USERNAME
 stty -echo
@@ -42,7 +47,7 @@ sudo /opt/HP/BSM/opr/bin/opr-node.sh -rc_file /tmp/tmp_rc -set_rc password="$PAS
 
 # Create Enrolled Node Server List. It is one time process
 #mkdir -p "/tmp/agent_upgrade"
-echo "Check enolled_node_list file exist" | tee "${log_path}"/agent_upgrade.log
+logit "Check enolled_node_list file exist"
 
 #Exclusion Sever list 
 #Any deployment is running skip for next cycle
@@ -52,14 +57,14 @@ echo "Check enolled_node_list file exist" | tee "${log_path}"/agent_upgrade.log
 #=========================================================================================================================
 
 if [[ -f "${data_path}/enrolled_node_list.txt" ]]; then
-   echo "${data_path}/enrolled_node_list.txt exists." | tee "${log_path}"/agent_upgrade.log
+   logit "${data_path}/enrolled_node_list.txt exists." 
 else
    rm -rf ${data_path}/master_node_list.txt
    #=========================================================================================================================
    #1. Check upgrade agent in installed in OBM Server. upgrade agent is not installed then exit
    # Update ${agent_upgrading_version}
    #=========================================================================================================================
-   echo "Step 1 Check upgrade agent is already installed in OBM server " | tee "${log_path}"/agent_upgrade.log
+   logit "Step 1 Check upgrade agent is already installed in OBM server "
    upgrade_agent_in_obm=`/opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -lp | grep -i "12.20.005" | wc -l`
    if [[ $upgrade_agent_in_obm -eq 0 ]]; then
       echo "expect agent 12.20.005 is not present in OBM"
