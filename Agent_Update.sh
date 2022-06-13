@@ -98,9 +98,6 @@ else
       Operating_System=`echo "$Operating_System" | awk -F "=" '{ print $2 }' | awk '{$1=$1};1'`
 
       if [[ $OA_Version != "12.20.005" ]]; then
-         #echo "$Primary_DNS_Name" 
-         #echo "$Operating_System" 
-         #echo "$OA_Version"
          echo "$Primary_DNS_Name|$Operating_System|$OA_Version" >> "${data_path}/master_node_list.txt"
       fi
    done <  "${data_path}/enrolled_node_list.txt"
@@ -147,22 +144,76 @@ fi
 
 
 #=========================================================================================================================
-# Loop master node list
+# Looping master node list
 #=========================================================================================================================
 
 #Declare variable i and J for array index
 i=0
 j=0
-
+logit "looping master node list records"
 while read Record
 do
    Primary_DNS_Name=`echo "$Record" | awk -F "|" '{ print $1}' | awk '{$1=$1};1'`
    Operating_System=`echo "$Record" | awk -F "|" '{ print $2}' | awk '{$1=$1};1'`
    OA_Version=`echo "$Record" | awk -F "|" '{ print $3}' | awk '{$1=$1};1'`
 
-   echo "$Primary_DNS_Name===$Operating_System===$OA_Version"
+   #=========================================================================================================================
+   # Step 2: Check Connection between OBM Server and Node
+   #=========================================================================================================================
+   /opt/OV/bin/bbcutil -ping $Primary_DNS_Name &> /dev/null
+   if [[ $? != 0 ]] ; then
+      # Add in remove list
+      logit "bbcutil ping failed : $Primary_DNS_Name"
+      remove_list[$j]="$Primary_DNS_Name"
+      j=`expr $j + 1`
+      continue
+   fi
+   #=========================================================================================================================
+   # Step 3: Check required Space in node end
+   #=========================================================================================================================
+   if [[ $Operating_System =~ ^Linux.* ]]; then
+      #/opt/OV/bin/ovdeploy -ovrg server -cmd 'df -k /opt/OV /opt/perf /var/opt/OV'  -host ilg01gtcrh701.pdxc-dev.pdxc.com  | awk 'NR !=1 {print "\t"($2/1024 "MB")"\t\t",$0}'
+      opt_size=`/opt/OV/bin/ovdeploy -ovrg server -cmd 'df -m /opt' -host $Primary_DNS_Name | awk 'NR !=1 {print $4 }'`
+      var_opt=`/opt/OV/bin/ovdeploy -ovrg server -cmd 'df -m /var/opt/OV' -host $Primary_DNS_Name | awk 'NR !=1 {print $4 }'`
+   elif [[ $Operating_System =~ ^Windows.*  ]]; then
+      c_drive=`/opt/OV/bin/ovdeploy -ovrg server -cmd 'fsutil volume diskfree c:'  -host $Operating_System | awk -F ":" '/avail free/{ print $2 }' | awk '{ print $1/1000000 }'`
+      #echo "Less $Primary_DNS_Name c_drive is $c_drive"
+   else
+      echo "OS type Currently not support my $0 script"
+      continue
+   fi
+
+   if [[ $opt_size -lt 150 || $var_opt -lt 150 || $c_drive -lt 150 ]]; then
+      logit "Less $Primary_DNS_Name opt_size is $opt_size"
+      logit "Less $Primary_DNS_Name var_opt is $var_opt"
+      logit "Less $Primary_DNS_Name var_opt is $c_drive"
+      # Add in remove list
+      remove_list[$j]="$Primary_DNS_Name"
+      j=`expr $j + 1`
+      continue
+   else
+      #agent_upgrade[$i]="$Primary_DNS_Name|$Operating_System|$OA_Version"
+      agent_upgrade[$i]="$Primary_DNS_Name"
+      i=`expr $i + 1`
+   fi  
+   #=========================================================================================================================
+   # Step 4: Number of server to agent upgrade it each then break the loop
+   #=========================================================================================================================
+   if [[ "${#agent_upgrade[@]}" -ge "${no_of_nodes_upgrade_parallel}" ]]; then
+      logit "agent_upgrade array values : ${agent_upgrade[@]}"
+      break
+   fi
 
 done <  "${data_path}/master_node_list.txt"
+
+#=========================================================================================================================
+# Step 4: Number of server to agent upgrade it each then break the loop
+#=========================================================================================================================
+
+
+#LOOP remove agent detail from list Which have issue
+logit "Value in remove list: ${remove_list[@]}"
+logit "Value in agent update list : ${agent_upgrade[@]}"
 
 exit 100
 
