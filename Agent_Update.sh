@@ -71,6 +71,7 @@ if [[ -f "${data_path}/enrolled_node_list.txt" ]]; then
    logit "enrolled_node_list.txt file exists in data directory."
    logit "Start Agent upgrading"
 else
+   logit "enolled_node_list file not found"
    logit "Creating Master node list"
    rm -rf ${data_path}/master_node_list.txt
    #=========================================================================================================================
@@ -104,9 +105,9 @@ else
    done <  "${data_path}/enrolled_node_list.txt"
 
    #=========================================================================================================================
-   #3. Remove node from Master list which has mentioned in exculsion list in configuration file
+   #3. Remove node from Master list which has mentioned in exclusion list in configuration file
    #=========================================================================================================================
-   logit "Step 3:  Remove node from Master list which has mentioned in exculsion list in configuration file"
+   logit "Step 3: Remove node from Master list which has mentioned in exclusion list in config file"
    for i in $(echo $exclusion_nodes | sed "s/,/ /g")
    do
       sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
