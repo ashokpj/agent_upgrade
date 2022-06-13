@@ -25,16 +25,16 @@ logstart()
 
 logit() 
 {
-   echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
+   #echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
    echo "[`date`] - ${*}" | tee -a "${log_path}"/agent_upgrade.log
-   echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
-   echo "\n\n" | tee -a "${log_path}"/agent_upgrade.log
+   #echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
 }
 
 logend() 
 {
    echo "[`date`] - ${*}" | tee -a "${log_path}"/agent_upgrade.log
    echo "[`date`] - Ending Cycle " | tee -a "${log_path}"/agent_upgrade.log
+   echo "\n\n" | tee -a "${log_path}"/agent_upgrade.log
 }
 #=========================================================================================================================
 # Read Configuration and set variable Value
