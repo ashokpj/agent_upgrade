@@ -69,16 +69,16 @@ fi
 #=========================================================================================================================
 logit "Check enolled_node_list file exist"
 if [[ -f "${data_path}/enrolled_node_list.txt" ]]; then
-   logit "enrolled_node_list.txt file exists in data directory."
+   logit "enrolled_node_list.txt file is exists in data directory."
    logit "Start Agent upgrading"
 else
-   logit "enolled_node_list file not found"
+   logit "enolled_node_list file is not found"
    logit "Creating Master node list"
    rm -rf ${data_path}/master_node_list.txt
    #=========================================================================================================================
    #1. Check upgrade agent in installed in OBM Server. upgrade agent is not installed then exit
    #=========================================================================================================================
-   logit "Step 1: Check upgrade agent [ ${agent_upgrading_version} ] is already installed in OBM server "
+   logit "Step 1: Check upgrade agent [ ${agent_upgrading_version} ] is installed in OBM server "
    upgrade_agent_in_obm=`/opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -lp | grep -i "${agent_upgrading_version}" | wc -l`
    if [[ $upgrade_agent_in_obm -eq 0 ]]; then
       logit "Expect agent 12.20.005 is not present in OBM"
@@ -156,9 +156,9 @@ j=0
 
 while read Record
 do
-   Primary_DNS_Name=`echo "$Record" | awk -F "=" '{ print $1}' | awk '{$1=$1};1'`
-   Operating_System=`echo "$Record" | awk -F "=" '{ print $2}' | awk '{$1=$1};1'`
-   OA_Version=`echo "$Record" | awk -F "=" '{ print $3}' | awk '{$1=$1};1'`
+   Primary_DNS_Name=`echo "$Record" | awk -F "|" '{ print $1}' | awk '{$1=$1};1'`
+   Operating_System=`echo "$Record" | awk -F "|" '{ print $2}' | awk '{$1=$1};1'`
+   OA_Version=`echo "$Record" | awk -F "|" '{ print $3}' | awk '{$1=$1};1'`
 
    echo "$Primary_DNS_Name===$Operating_System===$OA_Version"
 
