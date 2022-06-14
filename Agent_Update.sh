@@ -209,13 +209,36 @@ done <  "${data_path}/master_node_list.txt"
 #=========================================================================================================================
 # Step 4: Number of server to agent upgrade it each then break the loop
 #=========================================================================================================================
-
-
 #LOOP remove agent detail from list Which have issue
 logit "Value in remove list: ${remove_list[@]}"
 logit "Value in agent update list : ${agent_upgrade[@]}"
 
-exit 100
+#=========================================================================================================================
+# Step 5: Agent upgrade process
+#=========================================================================================================================
+logit "Agent upgrading......"
+
+#=========================================================================================================================
+# Step 6: Pre-request not meet in following server. log it in prerequest_issue.txt
+#=========================================================================================================================
+#Pre-request not meet in following server.
+for i in "${remove_list[@]}"
+do
+   echo "$i"  >> ${data_path}/prerequest_issue.txt
+done
+
+
+#=========================================================================================================================
+# Step 7: Remove servers name from master_node_list.txt
+#=========================================================================================================================
+# Remove servers name from enrollement list
+for i in "${remove_list[@]}" "${agent_upgrade[@]}"
+do
+   logit "Remove from list : $i"
+   sed -i.bak -e "/$i/,+2 d" ${data_path}/master_node_list.txt
+done
+
+exit 0
 
 
 
