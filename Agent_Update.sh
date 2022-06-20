@@ -11,7 +11,7 @@ read_config_file()
       "exclusion_nodes")   exclusion_nodes="$value" ;;
       "data_path")   data_path="$value" ;;
       "log_path")   log_path="$value" ;;
-      "stop_upgrade_deploy_failed_count")  stop_upgrade_deploy_failed_count="$value" ;;
+      "stop_upgrade_if_failed_count")  stop_upgrade_if_failed_count="$value" ;;
     esac
   done < "$file"
 }
@@ -134,9 +134,9 @@ fi
 logit "Step 1: Exit if Failed Job count is more then configured value"
 Failed_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list failed | wc -l`
 logit "Failed_Job_Count: ${Failed_Job_Count}"
-logit "Deployment job failed count: ${stop_upgrade_deploy_failed_count}"
+logit "Deployment job failed count: ${stop_upgrade_if_failed_count}"
 
-if [[ $Failed_Job_Count -gt ${stop_upgrade_deploy_failed_count} ]]; then
+if [[ $Failed_Job_Count -gt ${stop_upgrade_if_failed_count} ]]; then
    logit "Agent Upgrade is Stopped. Because already $Failed_Job_Count deployment Jobs failed or Retry."
    exit 3
 fi
@@ -225,6 +225,7 @@ logit "Agent upgrading......"
 for i in "${remove_list[@]}"
 do
    echo "$i"  >> ${data_path}/prerequest_issue.txt
+   echo "write immeditatly"
 done
 
 
