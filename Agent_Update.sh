@@ -5,7 +5,6 @@ read_config_file()
   file="$1"
   while IFS="=" read -r key value; do
     case "$key" in
-      "upgrading_os_type")  upgrading_os_type="$value" ;;
       "agent_upgrading_version")   agent_upgrading_version="$value" ;;
       "no_of_nodes_upgrade_parallel") no_of_nodes_upgrade_parallel="$value" ;;
       "exclusion_nodes")   exclusion_nodes="$value" ;;
@@ -76,7 +75,7 @@ else
    logit "Creating Master node list"
    rm -rf ${data_path}/master_node_list.txt
    #=========================================================================================================================
-   #1. Check upgrade agent in installed in OBM Server. upgrade agent is not installed then exit
+   #1. Check upgrade agent version is installed in OBM Server. upgrade agent is not installed then exit
    #=========================================================================================================================
    logit "Step 1: Check upgrade agent [ ${agent_upgrading_version} ] is installed in OBM server "
    upgrade_agent_in_obm=`/opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -lp | grep -i "${agent_upgrading_version}" | wc -l`
