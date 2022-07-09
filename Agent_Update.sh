@@ -34,8 +34,7 @@ logend()
    echo "[`date`] - ${*}" | tee -a "${log_path}"/agent_upgrade.log
    echo "[`date`] - Ending Cycle " | tee -a "${log_path}"/agent_upgrade.log
    echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
-   echo "\n\n" | tee -a "${log_path}"/agent_upgrade.log\
-   exit 0
+   echo "\n\n" | tee -a "${log_path}"/agent_upgrade.log
 }
 #=========================================================================================================================
 # Read Configuration and set variable Value
@@ -83,6 +82,7 @@ else
    upgrade_agent_in_obm=`/opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -lp | grep -i "${agent_upgrading_version}" | wc -l`
    if [[ $upgrade_agent_in_obm -eq 0 ]]; then
       logend "Expected agent ${agent_upgrading_version} is not present in OBM"
+      exit 0
    fi
 
    #=========================================================================================================================
@@ -124,6 +124,7 @@ else
       sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
    done
    logend "Ending Master node list creation Cycle"
+   exit 0
 fi
 
 #=========================================================================================================================
