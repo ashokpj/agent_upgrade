@@ -102,6 +102,8 @@ else
       fi
    done <  "${data_path}/enrolled_node_list.txt"
 
+   cp "${data_path}/master_node_list.txt" "${data_path}/m_be_master_node_list.txt"
+   
    #=========================================================================================================================
    #3. Remove node from Master node list which has mentioned in exclusion list in configuration file
    #=========================================================================================================================
@@ -111,6 +113,8 @@ else
       sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
    done
 
+   cp "${data_path}/master_node_list.txt" "${data_path}/m_ae_master_node_list.txt"
+   
    #=========================================================================================================================
    #4. Get Agent status of the enrolled nodes and remove node from master list if agent have any error or not running status.
    #=========================================================================================================================
