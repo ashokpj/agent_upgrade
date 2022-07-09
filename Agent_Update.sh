@@ -126,7 +126,8 @@ else
    for i in `grep -i "383: ERROR" ${data_path}/nodes_agent_status.txt | awk -F ":" '{ print $1 }'`
    do
       #echo "Remove from list : $i"
-      sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
+      #sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
+      sed -i.bak -e "/$i/d" "${data_path}/master_node_list.txt"
    done
    logend "Ending Master node list creation Cycle"
    exit 0
