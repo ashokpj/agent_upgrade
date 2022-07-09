@@ -34,7 +34,7 @@ logend()
    echo "[`date`] - ${*}" | tee -a "${log_path}"/agent_upgrade.log
    echo "[`date`] - Ending Cycle " | tee -a "${log_path}"/agent_upgrade.log
    echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
-   echo "\n\n" | tee -a "${log_path}"/agent_upgrade.log
+   echo " " | tee -a "${log_path}"/agent_upgrade.log
 }
 #=========================================================================================================================
 # Read Configuration and set variable Value
@@ -110,11 +110,12 @@ else
    logit "Step 3: Remove node from Master list which has mentioned in exclusion list in config file"
    for i in $(echo $exclusion_nodes | sed "s/,/ /g")
    do
-      sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
+      #sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
+      sed -i.bak -e "/$i/d" "${data_path}/master_node_list.txt"
    done
 
    cp "${data_path}/master_node_list.txt" "${data_path}/m_ae_master_node_list.txt"
-   
+
    #=========================================================================================================================
    #4. Get Agent status of the enrolled nodes and remove node from master list if agent have any error or not running status.
    #=========================================================================================================================
