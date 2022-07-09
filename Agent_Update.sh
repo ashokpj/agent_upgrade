@@ -185,7 +185,7 @@ do
       echo "opt_size  : $opt_size"
       echo "var_opt   : $var_opt"
    elif [[ $Operating_System =~ ^Windows.*  ]]; then
-      echo "Windows"
+      echo "Windows: /opt/OV/bin/ovdeploy -ovrg server -cmd 'fsutil volume diskfree c:'  -host $Operating_System | awk -F ":" '/avail free/{ print $2 }' | awk '{ print $1/1000000 }'"
       c_drive=`/opt/OV/bin/ovdeploy -ovrg server -cmd 'fsutil volume diskfree c:'  -host $Operating_System | awk -F ":" '/avail free/{ print $2 }' | awk '{ print $1/1000000 }'`
       echo "c_drive is $c_drive"
    else
