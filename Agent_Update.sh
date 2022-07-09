@@ -138,7 +138,7 @@ fi
 #=========================================================================================================================
 
 logit "Step 1: Exit if Failed Job count is more then configured value"
-Failed_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list failed | wc -l`
+Failed_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list failed | grep -c "Job Id"`
 logit "Failed_Job_Count: ${Failed_Job_Count}"
 logit "Deployment job failed count: ${stop_upgrade_if_failed_count}"
 
@@ -146,8 +146,6 @@ if [[ $Failed_Job_Count -gt ${stop_upgrade_if_failed_count} ]]; then
    logit "Agent Upgrade is Stopped. Because already $Failed_Job_Count deployment Jobs failed or Retry."
    exit 3
 fi
-
-
 
 #=========================================================================================================================
 # Looping master node list
@@ -166,6 +164,7 @@ do
    #=========================================================================================================================
    # Step 2: Check Connection between OBM Server and Node
    #=========================================================================================================================
+   logit "Step 2: /opt/OV/bin/bbcutil -ping $Primary_DNS_Name"
    /opt/OV/bin/bbcutil -ping $Primary_DNS_Name &> /dev/null
    if [[ $? != 0 ]] ; then
       # Add in remove list
@@ -180,9 +179,11 @@ do
    #=========================================================================================================================
    if [[ $Operating_System =~ ^Linux.* ]]; then
       #/opt/OV/bin/ovdeploy -ovrg server -cmd 'df -k /opt/OV /opt/perf /var/opt/OV'  -host ilg01gtcrh701.pdxc-dev.pdxc.com  | awk 'NR !=1 {print "\t"($2/1024 "MB")"\t\t",$0}'
+      echo "Linux"
       opt_size=`/opt/OV/bin/ovdeploy -ovrg server -cmd 'df -m /opt' -host $Primary_DNS_Name | awk 'NR !=1 {print $4 }'`
       var_opt=`/opt/OV/bin/ovdeploy -ovrg server -cmd 'df -m /var/opt/OV' -host $Primary_DNS_Name | awk 'NR !=1 {print $4 }'`
    elif [[ $Operating_System =~ ^Windows.*  ]]; then
+      echo "Windows"
       c_drive=`/opt/OV/bin/ovdeploy -ovrg server -cmd 'fsutil volume diskfree c:'  -host $Operating_System | awk -F ":" '/avail free/{ print $2 }' | awk '{ print $1/1000000 }'`
       #echo "Less $Primary_DNS_Name c_drive is $c_drive"
    else
@@ -193,7 +194,7 @@ do
    if [[ $opt_size -lt 150 || $var_opt -lt 150 || $c_drive -lt 150 ]]; then
       logit "Less $Primary_DNS_Name opt_size is $opt_size"
       logit "Less $Primary_DNS_Name var_opt is $var_opt"
-      logit "Less $Primary_DNS_Name var_opt is $c_drive"
+      logit "Less $Primary_DNS_Name c_drive is $c_drive"
       # Add in remove list
       remove_list[$j]="$Primary_DNS_Name"
       j=`expr $j + 1`
