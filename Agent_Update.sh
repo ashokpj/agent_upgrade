@@ -226,7 +226,7 @@ logit "Value in agent update list : ${agent_upgrade[@]}"
 #=========================================================================================================================
 logit "Agent upgrading......"
 lst=$( IFS=','; echo "${agent_upgrade[*]}" ); echo $lst
-echo sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -username admin -deploy_package Operations-agent -deploy_mode VERSION -package_ID 12.20.005 -node_list "$lst"
+echo sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -username admin -deploy_package Operations-agent -deploy_mode VERSION -package_ID ${agent_upgrading_version}8 -node_list "$lst"
 
 #=========================================================================================================================
 # Step 6: Pre-request not meet in following server. log it in prerequest_issue.txt
