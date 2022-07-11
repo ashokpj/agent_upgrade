@@ -157,6 +157,9 @@ j=0
 logit "looping master node list records"
 while read Record
 do
+   $opt_size=0
+   $var_opt=0
+   $c_drive=0
    Primary_DNS_Name=`echo "$Record" | awk -F "|" '{ print $1}' | awk '{$1=$1};1'`
    Operating_System=`echo "$Record" | awk -F "|" '{ print $2}' | awk '{$1=$1};1'`
    OA_Version=`echo "$Record" | awk -F "|" '{ print $3}' | awk '{$1=$1};1'`
@@ -194,9 +197,12 @@ do
    fi
 
    if [[ $opt_size -lt 150 || $var_opt -lt 150 || $c_drive -lt 150 ]]; then
-      logit "Less $Primary_DNS_Name opt_size is $opt_size"
-      logit "Less $Primary_DNS_Name var_opt is $var_opt"
-      logit "Less $Primary_DNS_Name c_drive is $c_drive"
+      if [[ $Operating_System =~ ^Linux.* ]]; then
+         logit "Less $Primary_DNS_Name opt_size is $opt_size"
+         logit "Less $Primary_DNS_Name var_opt is $var_opt"
+      elif [[ $Operating_System =~ ^Windows.*  ]]; then
+         logit "Less $Primary_DNS_Name c_drive is $c_drive"
+      fi
       # Add in remove list
       remove_list[$j]="$Primary_DNS_Name"
       j=`expr $j + 1`
