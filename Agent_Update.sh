@@ -185,11 +185,14 @@ do
       echo "Linux"
       opt_size=`/opt/OV/bin/ovdeploy -ovrg server -cmd 'df -m /opt' -host $Primary_DNS_Name | awk 'NR !=1 {print $4 }'`
       var_opt=`/opt/OV/bin/ovdeploy -ovrg server -cmd 'df -m /var/opt/OV' -host $Primary_DNS_Name | awk 'NR !=1 {print $4 }'`
+      opt_size=${opt_size%.*}
+      var_opt=${var_opt%.*}
       echo "opt_size  : $opt_size"
       echo "var_opt   : $var_opt"
    elif [[ $Operating_System =~ ^Windows.*  ]]; then
       echo "Windows: /opt/OV/bin/ovdeploy -ovrg server -cmd 'fsutil volume diskfree c:'  -host $Primary_DNS_Name | awk -F ":" '/avail free/{ print $2 }' | awk '{ print $1/1000000 }'"
       c_drive=`/opt/OV/bin/ovdeploy -ovrg server -cmd 'fsutil volume diskfree c:'  -host $Primary_DNS_Name | awk -F ":" '/avail free/{ print $2 }' | awk '{ print $1/1000000 }'`
+      c_drive=${c_drive%.*}
       echo "c_drive is $c_drive"
    else
       echo "OS type Currently not support my $0 script"
