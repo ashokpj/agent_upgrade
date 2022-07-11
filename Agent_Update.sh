@@ -137,7 +137,7 @@ fi
 #=========================================================================================================================
 logit "Step 1: Check master_node_list.txt contains records"
 if [[ -z $(grep '[^[:space:]]' "${data_path}/master_node_list.txt") ]] ; then
-  logend "${data_path}/master_node_list.txt is empty"
+  logend "master_node_list.txt is empty"
   exit 0
 fi
 
@@ -234,17 +234,11 @@ do
 
 done <  "${data_path}/master_node_list.txt"
 
-#=========================================================================================================================
-# Step 4: List both remove_list and agent_update array values
-#=========================================================================================================================
-logit "Step 4: List both remove_list and agent_update array values"
-logit "Value in remove list: ${remove_list[@]}"
-logit "Value in agent update list : ${agent_upgrade[@]}"
 
 #=========================================================================================================================
-# Step 5: Agent upgrade process
+# Step 4: Agent upgrade process
 #=========================================================================================================================
-logit "Step 5: Agent upgrading......"
+logit "Step 4: Agent upgrading......"
 if [ ${#agent_upgrade[@]} -gt 0 ]; then
   lst=$( IFS=','; echo "${agent_upgrade[*]}" ); echo $lst
   logit "sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -username admin -deploy_package Operations-agent -deploy_mode VERSION -package_ID ${agent_upgrading_version} -node_list "$lst" "
@@ -255,18 +249,20 @@ fi
 
 
 #=========================================================================================================================
-# Step 6: Pre-request not meet in following server. logit in prerequest_issue.txt
+# Step 5: Pre-request not meet in following server. logit in prerequest_issue.txt
 #=========================================================================================================================
-logit "Step 6: Pre-request not meet in following server. logit in prerequest_issue.txt"
+logit "Step 5: Pre-request not meet in following server. logit in prerequest_issue.txt"
 for i in "${remove_list[@]}"
 do
    echo "$i"  >> ${data_path}/prerequest_issue.txt
 done
 
 #=========================================================================================================================
-# Step 7: Remove servers name from master_node_list.txt
+# Step 6: Remove servers name from master_node_list.txt
 #=========================================================================================================================
-logit "Step 7: Remove remove_list and agent_upgrade array node from master_node_list.txt"
+logit "Step 6: Remove remove_list and agent_upgrade array node from master_node_list.txt"
+logit "Value in remove list: ${remove_list[@]}"
+logit "Value in agent update list : ${agent_upgrade[@]}"
 for i in "${remove_list[@]}" "${agent_upgrade[@]}"
 do
    sed -i.bak -e "/$i/d" ${data_path}/master_node_list.txt
