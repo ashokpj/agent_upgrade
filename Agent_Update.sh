@@ -157,9 +157,9 @@ j=0
 logit "looping master node list records"
 while read Record
 do
-   $opt_size=0
-   $var_opt=0
-   $c_drive=0
+   opt_size=0
+   var_opt=0
+   c_drive=0
    Primary_DNS_Name=`echo "$Record" | awk -F "|" '{ print $1}' | awk '{$1=$1};1'`
    Operating_System=`echo "$Record" | awk -F "|" '{ print $2}' | awk '{$1=$1};1'`
    OA_Version=`echo "$Record" | awk -F "|" '{ print $3}' | awk '{$1=$1};1'`
