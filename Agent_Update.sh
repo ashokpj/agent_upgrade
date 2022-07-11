@@ -196,7 +196,7 @@ do
       continue
    fi
 
-   if [[ $opt_size -lt 150 || $var_opt -lt 150 || $c_drive -lt 150 ]]; then
+   if [[ ( $opt_size -lt 150 || $var_opt -lt 150 ) && $Operating_System =~ ^Linux.*) || ( $c_drive -lt 150 && $Operating_System =~ ^Windows.*) ]]; then
       if [[ $Operating_System =~ ^Linux.* ]]; then
          logit "Less $Primary_DNS_Name opt_size is $opt_size"
          logit "Less $Primary_DNS_Name var_opt is $var_opt"
