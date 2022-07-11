@@ -122,11 +122,9 @@ else
    logit "Step 4: Get Agent status of the enrolled nodes"
    /opt/HP/BSM/opr/bin/opr-agt -rc_file /tmp/tmp_rc -status -all > ${data_path}/nodes_agent_status.txt
 
-   logit "Step 5: Remove Agent error node from enrolled node list "
+   logit "Step 5: Remove Agent error node from master_node_list list "
    for i in `grep -i "383: ERROR" ${data_path}/nodes_agent_status.txt | awk -F ":" '{ print $1 }'`
    do
-      #echo "Remove from list : $i"
-      #sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
       sed -i.bak -e "/$i/d" "${data_path}/master_node_list.txt"
    done
    logend "Ending Master node list creation Cycle"
@@ -137,7 +135,7 @@ fi
 #=========================================================================================================================
 # Step 1: Exit if master_node_list.txt is empty
 #=========================================================================================================================
-logit "Step 1: Check ${data_path}/master_node_list.txt contains records"
+logit "Step 1: Check master_node_list.txt contains records"
 if [[ -z $(grep '[^[:space:]]' "${data_path}/master_node_list.txt") ]] ; then
   logend "${data_path}/master_node_list.txt is empty"
   exit 0
