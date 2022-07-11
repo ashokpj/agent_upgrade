@@ -176,9 +176,9 @@ do
    OA_Version=`echo "$Record" | awk -F "|" '{ print $3}' | awk '{$1=$1};1'`
 
    #=========================================================================================================================
-   # Step 3: Check Connection between OBM Server and Node
+   # Step 3a: Check Connection between OBM Server and Node
    #=========================================================================================================================
-   logit "Step 3: /opt/OV/bin/bbcutil -ping $Primary_DNS_Name"
+   logit "Step 3a: /opt/OV/bin/bbcutil -ping $Primary_DNS_Name"
    /opt/OV/bin/bbcutil -ping $Primary_DNS_Name &> /dev/null
    if [[ $? != 0 ]] ; then
       # Add in remove list
@@ -189,9 +189,9 @@ do
    fi
 
    #=========================================================================================================================
-   # Step 4: Check required Space at the node end
+   # Step 3b: Check required Space at the node end
    #=========================================================================================================================
-   logit "Step 4: Check required Space at the node end"
+   logit "Step 3b: Check required Space at the node end"
    if [[ $Operating_System =~ ^Linux.* ]]; then
       #/opt/OV/bin/ovdeploy -ovrg server -cmd 'df -k /opt/OV /opt/perf /var/opt/OV'  -host ilg01gtcrh701.pdxc-dev.pdxc.com  | awk 'NR !=1 {print "\t"($2/1024 "MB")"\t\t",$0}'
       echo "Linux"
@@ -211,9 +211,9 @@ do
       continue
    fi
    #=========================================================================================================================
-   # Step 5: if node have sufficient space add it in agent_upgrate array else add it in remove_list array
+   # Step 3c: if node have sufficient space add it in agent_upgrate array else add it in remove_list array
    #=========================================================================================================================
-   logit "Step 5: Check required Space at the node end"
+   logit "Step 3c: if node have sufficient space add it in agent_upgrate array else add it in remove_list array"
    if [[ ( ( $opt_size -lt 150 || $var_opt -lt 150 ) && $Operating_System =~ ^Linux.* ) || ( $c_drive -lt 150 && $Operating_System =~ ^Windows.* ) ]]; then
       if [[ $Operating_System =~ ^Linux.* ]]; then
          logit "Less $Primary_DNS_Name opt_size is $opt_size"
@@ -231,9 +231,9 @@ do
       i=`expr $i + 1`
    fi  
    #=========================================================================================================================
-   # Step 6: agent_upgrade array size is more then configured value then break loop 
+   # Step 3d: if agent_upgrade array size is more then configured value then break loop 
    #=========================================================================================================================
-   logit "Step 6: agent_upgrade array size is more then configured value then break loop "
+   logit "Step 3d: if agent_upgrade array size is more then configured value then break loop "
    if [[ "${#agent_upgrade[@]}" -ge "${no_of_nodes_upgrade_parallel}" ]]; then
       logit "agent_upgrade array values : ${agent_upgrade[@]}"
       break
@@ -242,16 +242,16 @@ do
 done <  "${data_path}/master_node_list.txt"
 
 #=========================================================================================================================
-# Step 7: List both remove_list and agent_update array values
+# Step 4: List both remove_list and agent_update array values
 #=========================================================================================================================
-logit "Step 7: List both remove_list and agent_update array values"
+logit "Step 4: List both remove_list and agent_update array values"
 logit "Value in remove list: ${remove_list[@]}"
 logit "Value in agent update list : ${agent_upgrade[@]}"
 
 #=========================================================================================================================
-# Step 8: Agent upgrade process
+# Step 5: Agent upgrade process
 #=========================================================================================================================
-logit "Step 8: Agent upgrading......"
+logit "Step 5: Agent upgrading......"
 if [ ${#agent_upgrade[@]} -gt 0 ]; then
   lst=$( IFS=','; echo "${agent_upgrade[*]}" ); echo $lst
   logit "sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -username admin -deploy_package Operations-agent -deploy_mode VERSION -package_ID ${agent_upgrading_version} -node_list "$lst" "
@@ -262,18 +262,18 @@ fi
 
 
 #=========================================================================================================================
-# Step 9: Pre-request not meet in following server. logit in prerequest_issue.txt
+# Step 6: Pre-request not meet in following server. logit in prerequest_issue.txt
 #=========================================================================================================================
-logit "Step 9: Pre-request not meet in following server. logit in prerequest_issue.txt"
+logit "Step 6: Pre-request not meet in following server. logit in prerequest_issue.txt"
 for i in "${remove_list[@]}"
 do
    echo "$i"  >> ${data_path}/prerequest_issue.txt
 done
 
 #=========================================================================================================================
-# Step 10: Remove servers name from master_node_list.txt
+# Step 7: Remove servers name from master_node_list.txt
 #=========================================================================================================================
-logit "Step 10: Remove remove_list and agent_upgrade array node from master_node_list.txt"
+logit "Step 7: Remove remove_list and agent_upgrade array node from master_node_list.txt"
 for i in "${remove_list[@]}" "${agent_upgrade[@]}"
 do
    sed -i.bak -e "/$i/d" ${data_path}/master_node_list.txt
