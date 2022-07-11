@@ -133,11 +133,22 @@ else
    exit 0
 fi
 
+
 #=========================================================================================================================
-# Step 1: Exit if Failed Job count is more then configured value
+# Step 1: Exit if master_node_list.txt is empty
 #=========================================================================================================================
 
-logit "Step 1: Exit if Failed Job count is more then configured value"
+if [[ -z $(grep '[^[:space:]]' "${data_path}/master_node_list.txt") ]] ; then
+  logend "${data_path}/master_node_list.txt is empty"
+  exit 0
+fi
+
+
+#=========================================================================================================================
+# Step 2: Exit if Failed Job count is more then configured value
+#=========================================================================================================================
+
+logit "Step 2: Exit if Failed Job count is more then configured value"
 Failed_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list failed | grep -c "Job Id"`
 logit "Failed_Job_Count: ${Failed_Job_Count}"
 logit "Deployment job failed count: ${stop_upgrade_if_failed_count}"
@@ -236,8 +247,14 @@ logit "Value in agent update list : ${agent_upgrade[@]}"
 # Step 5: Agent upgrade process
 #=========================================================================================================================
 logit "Agent upgrading......"
-lst=$( IFS=','; echo "${agent_upgrade[*]}" ); echo $lst
-echo sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -username admin -deploy_package Operations-agent -deploy_mode VERSION -package_ID ${agent_upgrading_version}8 -node_list "$lst"
+if [ ${#agent_upgrade[@]} -gt 0 ]; then
+  lst=$( IFS=','; echo "${agent_upgrade[*]}" ); echo $lst
+  logit 'sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -username admin -deploy_package Operations-agent -deploy_mode VERSION -package_ID ${agent_upgrading_version} -node_list "$lst" '
+  #sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -username admin -deploy_package Operations-agent -deploy_mode VERSION -package_ID ${agent_upgrading_version} -node_list "$lst"
+else
+  logit  "agent_upgrade array is empty"
+fi
+
 
 #=========================================================================================================================
 # Step 6: Pre-request not meet in following server. log it in prerequest_issue.txt
@@ -246,7 +263,6 @@ echo sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -username admin -deploy_pac
 for i in "${remove_list[@]}"
 do
    echo "$i"  >> ${data_path}/prerequest_issue.txt
-   echo "write immeditatly"
 done
 
 
