@@ -18,7 +18,7 @@ read_config_file()
 logstart() 
 {   
    echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
-   echo "[`date`] - Starting Cycle " | tee -a "${log_path}"/agent_upgrade.log
+   echo "[`date`] - Start Cycle " | tee -a "${log_path}"/agent_upgrade.log
    echo "[`date`] - ${*}" | tee -a "${log_path}"/agent_upgrade.log
    echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
 }
@@ -32,19 +32,19 @@ logend()
 {
    echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
    echo "[`date`] - ${*}" | tee -a "${log_path}"/agent_upgrade.log
-   echo "[`date`] - Ending Cycle " | tee -a "${log_path}"/agent_upgrade.log
+   echo "[`date`] - End Cycle " | tee -a "${log_path}"/agent_upgrade.log
    echo "================================================================"| tee -a "${log_path}"/agent_upgrade.log
    echo " " | tee -a "${log_path}"/agent_upgrade.log
 }
 #=========================================================================================================================
 # Read Configuration and set variable Value
-# Create data directory and log directory
+# Create data directory and log directory (if it does not exist)
 #=========================================================================================================================
 read_config_file ./agent_upgrade_config.cfg
 mkdir -p "${data_path}"
 mkdir -p "${log_path}"
 logstart "Starting"
-logit "Created data and log directory"
+logit "Create data and log directory (if it does not exist)"
 logit "Readed configuration file"
 
 #=========================================================================================================================
@@ -55,7 +55,7 @@ if [[ ! -f /tmp/tmp_rc ]]; then
    printf "OBM Username: "
    read USERNAME
    stty -echo
-   printf "OBM assword: "
+   printf "OBM Password: "
    read PASSWORD
    stty echo
    printf "\n"
@@ -64,14 +64,14 @@ if [[ ! -f /tmp/tmp_rc ]]; then
 fi
 
 #=========================================================================================================================
-# Check master_node_list.txt exist in data_path else craete it
+# Check master_node_list.txt exist in data_path else create
 #=========================================================================================================================
-logit "Check enolled_node_list file exist"
+logit "Check enrolled_node_list file exist"
 if [[ -f "${data_path}/enrolled_node_list.txt" ]]; then
-   logit "enrolled_node_list.txt file is exists in data directory."
-   logit "Start Agent upgrading"
+   logit "enrolled_node_list.txt file exists in data directory."
+   logit "Start Agent upgrade"
 else
-   logit "enolled_node_list file is not found"
+   logit "enrolled_node_list file is not found"
    logit "Creating Master node list"
    rm -rf ${data_path}/master_node_list.txt
 
@@ -88,7 +88,7 @@ else
    #=========================================================================================================================
    #2. Get OBM Enrolled node list
    #=========================================================================================================================
-   logit "Step 2: Creating enolled_node_list file"
+   logit "Step 2: Creating enrolled_node_list file"
    /opt/HP/BSM/opr/bin/opr-node.sh -list_nodes -rc_file /tmp/tmp_rc -ln | egrep "Primary DNS Name|Operating System|OA Version" > "${data_path}/enrolled_node_list.txt"
 
    while read Primary_DNS_Name; read Operating_System; read OA_Version
@@ -102,32 +102,28 @@ else
       fi
    done <  "${data_path}/enrolled_node_list.txt"
 
-   cp "${data_path}/master_node_list.txt" "${data_path}/m_be_master_node_list.txt"
-   
+      
    #=========================================================================================================================
-   #3. Remove node from Master node list which has mentioned in exclusion list in configuration file
+   #3. Remove node from Master node list which is mentioned in exclusion list in the configuration file
    #=========================================================================================================================
-   logit "Step 3: Remove node from Master list which has mentioned in exclusion list in config file"
+   logit "Step 3: Remove node from Master list which is mentioned in exclusion list in the config file"
    for i in $(echo $exclusion_nodes | sed "s/,/ /g")
    do
-      #sed -i.bak -e "/$i/,+2 d" "${data_path}/master_node_list.txt"
       sed -i.bak -e "/$i/d" "${data_path}/master_node_list.txt"
    done
 
-   cp "${data_path}/master_node_list.txt" "${data_path}/m_ae_master_node_list.txt"
-
    #=========================================================================================================================
-   #4. Get Agent status of the enrolled nodes and remove node from master list if agent have any error or not running status.
+   #4. Get Agent status of the enrolled nodes and remove node from master list if agent has any error.
    #=========================================================================================================================
    logit "Step 4: Get Agent status of the enrolled nodes"
    /opt/HP/BSM/opr/bin/opr-agt -rc_file /tmp/tmp_rc -status -all > ${data_path}/nodes_agent_status.txt
 
-   logit "Step 5: Remove Agent error node from master_node_list list "
+   logit "Step 5: Remove Agent error node from master_node_list"
    for i in `grep -i "383: ERROR" ${data_path}/nodes_agent_status.txt | awk -F ":" '{ print $1 }'`
    do
       sed -i.bak -e "/$i/d" "${data_path}/master_node_list.txt"
    done
-   logend "Ending Master node list creation Cycle"
+   logend "End Master node list creation Cycle"
    exit 0
 fi
 
@@ -135,7 +131,7 @@ fi
 #=========================================================================================================================
 # Step 1: Exit if master_node_list.txt is empty
 #=========================================================================================================================
-logit "Step 1: Check master_node_list.txt contains records"
+logit "Step 1: Check if master_node_list.txt contains records"
 if [[ -z $(grep '[^[:space:]]' "${data_path}/master_node_list.txt") ]] ; then
   logend "master_node_list.txt is empty"
   exit 0
@@ -143,16 +139,16 @@ fi
 
 
 #=========================================================================================================================
-# Step 2: Exit if Failed Job count is more then configured value
+# Step 2: Exit if Failed Job count is more than configured value
 #=========================================================================================================================
 
-logit "Step 2: Exit if Failed Job count is more then configured value"
+logit "Step 2: Exit if Failed Job count is more than configured value"
 Failed_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list failed | grep -c "Job Id"`
 logit "Failed_Job_Count: ${Failed_Job_Count}"
 logit "Deployment job failed count: ${stop_upgrade_if_failed_count}"
 
 if [[ $Failed_Job_Count -gt ${stop_upgrade_if_failed_count} ]]; then
-   logit "Agent Upgrade is Stopped. Because already $Failed_Job_Count deployment Jobs failed or Retry."
+   logit "Agent Upgrade is stopped since $Failed_Job_Count deployment Jobs failed."
    exit 3
 fi
 
@@ -205,9 +201,9 @@ do
       continue
    fi
    #=========================================================================================================================
-   # Step 3c: if node have sufficient space add it in agent_upgrate array else add it in remove_list array
+   # Step 3c: if node has sufficient space, add it in agent_upgrade array else add it in remove_list array
    #=========================================================================================================================
-   logit "Step 3c: if node have sufficient space add it in agent_upgrate array else add it in remove_list array"
+   logit "Step 3c: if node has sufficient space add it in agent_upgrate array else add it in remove_list array"
    if [[ ( ( $opt_size -lt 150 || $var_opt -lt 150 ) && $Operating_System =~ ^Linux.* ) || ( $c_drive -lt 150 && $Operating_System =~ ^Windows.* ) ]]; then
       if [[ $Operating_System =~ ^Linux.* ]]; then
          logit "Less $Primary_DNS_Name opt_size is $opt_size"
@@ -224,9 +220,9 @@ do
       i=`expr $i + 1`
    fi  
    #=========================================================================================================================
-   # Step 3d: if agent_upgrade array size is more then configured value then break loop 
+   # Step 3d: if agent_upgrade array size is more than configured value then break loop 
    #=========================================================================================================================
-   logit "Step 3d: if agent_upgrade array size is more then configured value then break loop "
+   logit "Step 3d: if agent_upgrade array size is more than configured value then break loop "
    if [[ "${#agent_upgrade[@]}" -ge "${no_of_nodes_upgrade_parallel}" ]]; then
       logit "agent_upgrade array values : ${agent_upgrade[@]}"
       break
@@ -249,16 +245,16 @@ fi
 
 
 #=========================================================================================================================
-# Step 5: Pre-request not meet in following server. logit in prerequest_issue.txt
+# Step 5: Pre-requisite is not met in following server. logit in prerequest_issue.txt
 #=========================================================================================================================
-logit "Step 5: Pre-request not meet in following server. logit in prerequest_issue.txt"
+logit "Step 5: Pre-requisite not met in following server. logit in prerequest_issue.txt"
 for i in "${remove_list[@]}"
 do
    echo "$i"  >> ${data_path}/prerequest_issue.txt
 done
 
 #=========================================================================================================================
-# Step 6: Remove servers name from master_node_list.txt
+# Step 6: Remove server name from master_node_list.txt
 #=========================================================================================================================
 logit "Step 6: Remove remove_list and agent_upgrade array node from master_node_list.txt"
 logit "Value in remove list: ${remove_list[@]}"
@@ -268,4 +264,5 @@ do
    sed -i.bak -e "/$i/d" ${data_path}/master_node_list.txt
 done
 
+logend "End.."
 exit 0
