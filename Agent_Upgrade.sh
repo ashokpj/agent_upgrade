@@ -237,8 +237,8 @@ done <  "${data_path}/master_node_list.txt"
 logit "Step 4: Agent upgrading......"
 if [ ${#agent_upgrade[@]} -gt 0 ]; then
   lst=$( IFS=','; echo "${agent_upgrade[*]}" ); echo $lst
-  logit "sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -username admin -deploy_package Operations-agent -deploy_mode VERSION ${agent_upgrading_version} -node_list "$lst" "
-  sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -username admin -deploy_package Operations-agent -deploy_mode VERSION -package_id ${agent_upgrading_version} -node_list "$lst"
+  logit "sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -deploy_package Operations-agent -deploy_mode VERSION -package_id ${agent_upgrading_version} -node_list "$lst" "
+  sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -deploy_package Operations-agent -deploy_mode VERSION -package_id ${agent_upgrading_version} -node_list "$lst"
 else
   logit  "agent_upgrade array is empty"
 fi
