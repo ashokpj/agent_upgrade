@@ -164,7 +164,7 @@ logit "Step 3: Skip the cycle if any deployment job is running"
 Running_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list -show_details |  grep -ic "running"`
 if [[ $? -eq 0 ]]; then
    logit "Running_Job_Count: ${Running_Job_Count}"
-   if [[ $Running_Job_Count -ge 1 } ]]; then
+   if [[ $Running_Job_Count -ge 1  ]]; then
       logend "Few deployment jobs are running. So Skip this cycle."
       exit 3
    fi
