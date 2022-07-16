@@ -257,7 +257,6 @@ if [ ${#agent_upgrade[@]} -gt 0 ]; then
       logend " Error When executing opr-package-manager.sh"
       exit 3
   fi
-
 else 
   logit  "agent_upgrade array is empty"
 fi
