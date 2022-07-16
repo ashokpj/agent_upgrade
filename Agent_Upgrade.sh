@@ -144,11 +144,15 @@ fi
 
 logit "Step 2: Exit if Failed Job count is more than configured value"
 Failed_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list -show_details |  grep -ic "Error Text: Update installed package Operations-agent to latest version"`
-logit "Failed_Job_Count: ${Failed_Job_Count}"
-logit "Deployment job failed count: ${stop_upgrade_if_failed_count}"
-
-if [[ $Failed_Job_Count -ge ${stop_upgrade_if_failed_count} ]]; then
-   logit "Agent Upgrade is stopped since $Failed_Job_Count deployment Jobs failed."
+if [[ $? -eq 0 ]]; then
+   logit "Failed_Job_Count: ${Failed_Job_Count}"
+   logit "Deployment job failed count: ${stop_upgrade_if_failed_count}"
+   if [[ $Failed_Job_Count -ge ${stop_upgrade_if_failed_count} ]]; then
+      logend "Agent Upgrade is stopped since $Failed_Job_Count deployment Jobs failed."
+      exit 3
+   fi
+else
+   logend "Failed While finding failed job count"
    exit 3
 fi
 
@@ -158,10 +162,14 @@ fi
 
 logit "Step 3: Skip the cycle if any deployment job is running"
 Running_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list -show_details |  grep -ic "running"`
-logit "Running_Job_Count: ${Running_Job_Count}"
-
-if [[ $Running_Job_Count -ge 1 } ]]; then
-   logit "Few deployment jobs are running. So Skip this cycle."
+if [[ $? -eq 0 ]]; then
+   logit "Running_Job_Count: ${Running_Job_Count}"
+   if [[ $Running_Job_Count -ge 1 } ]]; then
+      logend "Few deployment jobs are running. So Skip this cycle."
+      exit 3
+   fi
+else
+   logend "Failed While finding running job count"
    exit 3
 fi
 
@@ -252,7 +260,12 @@ if [ ${#agent_upgrade[@]} -gt 0 ]; then
   lst=$( IFS=','; echo "${agent_upgrade[*]}" ); echo $lst
   logit "sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -deploy_package Operations-agent -deploy_mode VERSION -package_id ${agent_upgrading_version} -node_list "$lst" "
   #sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -deploy_package Operations-agent -deploy_mode VERSION -package_id ${agent_upgrading_version} -node_list "$lst"
-else
+  if [[ $? -ne 0 ]]; then
+      logend " Error When executing opr-package-manager.sh"
+      exit 3
+  fi
+
+else 
   logit  "agent_upgrade array is empty"
 fi
 
