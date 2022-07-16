@@ -144,34 +144,27 @@ fi
 
 logit "Step 2: Exit if Failed Job count is more than configured value"
 Failed_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list -show_details |  grep -ic "Error Text: Update installed package Operations-agent to latest version"`
-if [[ $? -eq 0 ]]; then
-   logit "Failed_Job_Count: ${Failed_Job_Count}"
-   logit "Deployment job failed count: ${stop_upgrade_if_failed_count}"
-   if [[ $Failed_Job_Count -ge ${stop_upgrade_if_failed_count} ]]; then
-      logend "Agent Upgrade is stopped since $Failed_Job_Count deployment Jobs failed."
-      exit 3
-   fi
-else
-   logend "Failed While finding failed job count"
+
+logit "Failed_Job_Count: ${Failed_Job_Count}"
+logit "Deployment job failed count: ${stop_upgrade_if_failed_count}"
+if [[ $Failed_Job_Count -ge ${stop_upgrade_if_failed_count} ]]; then
+   logend "Agent Upgrade is stopped since $Failed_Job_Count deployment Jobs failed."
    exit 3
 fi
+
 
 #=========================================================================================================================
 # Step 3: Skip the cycle if any deployment job is running
 #=========================================================================================================================
 
 logit "Step 3: Skip the cycle if any deployment job is running"
-Running_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list -show_details |  grep -ic " State: running"`
-if [[ $? -eq 0 ]]; then
-   logit "Running_Job_Count: ${Running_Job_Count}"
-   if [[ $Running_Job_Count -ge 1  ]]; then
-      logend "Few deployment jobs are running. So Skip this cycle."
-      exit 3
-   fi
-else
-   logend "Failed While finding running job count"
+Running_Job_Count=`/opt/HP/BSM/opr/bin/opr-jobs -rc_file /tmp/tmp_rc  -list -show_details |  grep -ic "State: running"`
+logit "Running_Job_Count: ${Running_Job_Count}"
+if [[ $Running_Job_Count -ge 1  ]]; then
+   logend "Few deployment jobs are running. So Skip this cycle."
    exit 3
 fi
+
 
 #=========================================================================================================================
 # Looping master node list
