@@ -8,8 +8,8 @@ read_config_file()
       "agent_upgrading_version")   agent_upgrading_version="$value" ;;
       "no_of_nodes_upgrade_parallel") no_of_nodes_upgrade_parallel="$value" ;;
       "exclusion_nodes")   exclusion_nodes="$value" ;;
-      "data_path")   data_path="$value" ;;
-      "log_path")   log_path="$value" ;;
+      "data_path")   data_path="`$value`" ;;
+      "log_path")   log_path="`$value`" ;;
       "stop_upgrade_if_failed_count")  stop_upgrade_if_failed_count="$value" ;;
     esac
   done < "$file"
