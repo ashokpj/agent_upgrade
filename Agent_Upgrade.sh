@@ -43,9 +43,9 @@ logend()
 read_config_file ./agent_upgrade_config.cfg
 mkdir -p "${data_path}"
 mkdir -p "${log_path}"
-logstart "Starting"
+logstart "Starting ..."
 logit "Create data and log directory (if it does not exist)"
-logit "Readed configuration file"
+logit "Reading configuration file"
 
 #=========================================================================================================================
 # Set OBM username and Password
@@ -66,7 +66,7 @@ fi
 #=========================================================================================================================
 # Check master_node_list.txt exist in data_path else create
 #=========================================================================================================================
-logit "Check enrolled_node_list file exist"
+logit "Check enrolled_node_list file exists"
 if [[ -f "${data_path}/enrolled_node_list.txt" ]]; then
    logit "enrolled_node_list.txt file exists in data directory."
    logit "Start Agent upgrade"
@@ -104,9 +104,9 @@ else
 
       
    #=========================================================================================================================
-   #3. Remove node from Master node list which is mentioned in exclusion list in the configuration file
+   #3. Remove node from Master node list which is mentioned in exclusion list of the configuration file
    #=========================================================================================================================
-   logit "Step 3: Remove node from Master list which is mentioned in exclusion list in the config file"
+   logit "Step 3: Remove node from Master list which is mentioned in exclusion list of the config file"
    for i in $(echo $exclusion_nodes | sed "s/,/ /g")
    do
       sed -i.bak -e "/$i/d" "${data_path}/master_node_list.txt"
