@@ -86,11 +86,12 @@ else
    fi
 
    #=========================================================================================================================
-   #2. Get OBM Enrolled node list
+   #2. Get OBM Enrolled node list and filer 
    #=========================================================================================================================
    logit "Step 2: Creating enrolled_node_list file"
    /opt/HP/BSM/opr/bin/opr-node.sh -list_nodes -rc_file /tmp/tmp_rc -ln | egrep "Primary DNS Name|Operating System|OA Version" > "${data_path}/enrolled_node_list.txt"
-
+   
+   logit "Step 3: Remove nodes from enrolled_node_list file Which have agent version ${agent_upgrading_version}"
    while read Primary_DNS_Name; read Operating_System; read OA_Version
    do
       OA_Version=`echo "$OA_Version" | awk -F "=" '{ print $2 }' | awk '{$1=$1};1'`
@@ -101,24 +102,25 @@ else
          echo "$Primary_DNS_Name|$Operating_System|$OA_Version" >> "${data_path}/master_node_list.txt"
       fi
    done <  "${data_path}/enrolled_node_list.txt"
+   
 
       
    #=========================================================================================================================
-   #3. Remove node from Master node list which is mentioned in exclusion list of the configuration file
+   #4. Remove node from Master node list which is mentioned in exclusion list of the configuration file
    #=========================================================================================================================
-   logit "Step 3: Remove node from Master list which is mentioned in exclusion list of the config file"
+   logit "Step 4: Remove node from Master list which is mentioned in exclusion list of the config file"
    for i in $(echo $exclusion_nodes | sed "s/,/ /g")
    do
       sed -i.bak -e "/$i/d" "${data_path}/master_node_list.txt"
    done
 
    #=========================================================================================================================
-   #4. Get Agent status of the enrolled nodes and remove node from master list if agent has any error.
+   #5. Get Agent status of the enrolled nodes and remove node from master list if agent has any error.
    #=========================================================================================================================
-   logit "Step 4: Get Agent status of the enrolled nodes"
+   logit "Step 5: Get Agent status of the enrolled nodes"
    /opt/HP/BSM/opr/bin/opr-agt -rc_file /tmp/tmp_rc -status -all > ${data_path}/nodes_agent_status.txt
 
-   logit "Step 5: Remove Agent error node from master_node_list"
+   logit "Step 6: Remove Agent error node from master_node_list"
    for i in `grep -i "383: ERROR" ${data_path}/nodes_agent_status.txt | awk -F ":" '{ print $1 }'`
    do
       sed -i.bak -e "/$i/d" "${data_path}/master_node_list.txt"
