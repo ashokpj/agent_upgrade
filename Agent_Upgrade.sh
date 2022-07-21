@@ -88,7 +88,7 @@ else
    #=========================================================================================================================
    #2. Get OBM Enrolled node list and filer 
    #=========================================================================================================================
-   logit "Step 2: Creating enrolled_node_list file"
+   logit "Step 2: Creating enrolled_node_list file in format [Primary DNS Name|Operating System|OA Version]  "
    /opt/HP/BSM/opr/bin/opr-node.sh -list_nodes -rc_file /tmp/tmp_rc -ln | egrep "Primary DNS Name|Operating System|OA Version" > "${data_path}/enrolled_node_list.txt"
    
    logit "Step 3: Remove nodes from enrolled_node_list which have agent version ${agent_upgrading_version} and create master_node_list.txt file"
