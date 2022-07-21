@@ -252,7 +252,7 @@ logit "Step 5: Agent upgrading......"
 if [ ${#agent_upgrade[@]} -gt 0 ]; then
   lst=$( IFS=','; echo "${agent_upgrade[*]}" ); echo $lst
   logit "sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -deploy_package Operations-agent -deploy_mode VERSION -package_id ${agent_upgrading_version} -node_list "$lst" "
-  #sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -deploy_package Operations-agent -deploy_mode VERSION -package_id ${agent_upgrading_version} -node_list "$lst"
+  sudo /opt/HP/BSM/opr/bin/opr-package-manager.sh -rc_file /tmp/tmp_rc -deploy_package Operations-agent -deploy_mode VERSION -package_id ${agent_upgrading_version} -node_list "$lst"
   if [[ $? -ne 0 ]]; then
       logend " Error When executing opr-package-manager.sh"
       exit 3
