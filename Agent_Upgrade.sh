@@ -91,7 +91,7 @@ else
    logit "Step 2: Creating enrolled_node_list file"
    /opt/HP/BSM/opr/bin/opr-node.sh -list_nodes -rc_file /tmp/tmp_rc -ln | egrep "Primary DNS Name|Operating System|OA Version" > "${data_path}/enrolled_node_list.txt"
    
-   logit "Step 3: Remove nodes from enrolled_node_list file Which have agent version ${agent_upgrading_version}"
+   logit "Step 3: Remove nodes from enrolled_node_list which have agent version ${agent_upgrading_version} and create master_node_list.txt file"
    while read Primary_DNS_Name; read Operating_System; read OA_Version
    do
       OA_Version=`echo "$OA_Version" | awk -F "=" '{ print $2 }' | awk '{$1=$1};1'`
